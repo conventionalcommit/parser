@@ -109,6 +109,8 @@ func createTag(t *testing.T, r *git.Repository, tag string) {
 func TestGetCommits(t *testing.T) {
 	const (
 		b1 = "b1"
+		b2 = "b2"
+		b3 = "b3"
 
 		c1 = "first commit"
 		c2 = "second commit"
@@ -201,6 +203,21 @@ func TestGetCommits(t *testing.T) {
 				c3,
 			},
 		},
+		"to before from": {
+			setup: func(t *testing.T) *git.Repository {
+				r := createRepository(t)
+				createBranch(t, r, b1)
+				createCommit(t, r, c1)
+				createCommit(t, r, c2)
+				createCommit(t, r, c3)
+				return r
+			},
+			from: head,
+			to:   head2,
+			expected: []string{
+				c1,
+			},
+		},
 	}
 
 	for name, data := range cases {
@@ -254,18 +271,6 @@ func TestGetCommitsError(t *testing.T) {
 			},
 			from: head1,
 			to:   "bad",
-		},
-		"to before from": {
-			setup: func(t *testing.T) *git.Repository {
-				r := createRepository(t)
-				createBranch(t, r, b1)
-				createCommit(t, r, c1)
-				createCommit(t, r, c2)
-				createCommit(t, r, c3)
-				return r
-			},
-			from: head,
-			to:   head2,
 		},
 	}
 

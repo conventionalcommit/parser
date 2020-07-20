@@ -51,7 +51,8 @@ func getCommits(r *git.Repository, from, to string) ([]string, error) {
 	for {
 		c, err := iter.Next()
 		if err != nil {
-			return nil, err
+			xlog.Debug("No more messages to parse")
+			break
 		}
 
 		if c.Hash.String() == fromHash.String() {
@@ -60,6 +61,7 @@ func getCommits(r *git.Repository, from, to string) ([]string, error) {
 
 		messages = append(messages, c.Message)
 	}
+	xlog.Debugf("Got messages: %v", messages)
 	return messages, nil
 }
 

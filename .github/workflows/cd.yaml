@@ -1,0 +1,106 @@
+name: CD
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  prebuild:
+    name: Prebuild
+    runs-on: ubuntu-latest
+    outputs:
+      newversion: ${{ env.NEW_VERSION }}
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+      with:
+        ref: ${{ github.ref }}
+        fetch-depth: 0 # Include all history as we need that to determine the next version
+    - name: Determine New Version
+      run: echo "::set-env name=NEW_VERSION::$(make local-version)"
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    needs:
+      prebuild
+    strategy:
+      matrix:
+        os: [darwin, linux]
+        arch: [amd64]
+    outputs:
+      newversion: ${{ needs.prebuild.outputs.newversion }}
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+      with:
+        ref: ${{ github.ref }}
+    - name: Bootstrap
+      run: make bootstrap
+    - name: Build
+      run: make NEW_VERSION=${{ needs.prebuild.outputs.newversion }}
+      env:
+        TARGET_OS: ${{ matrix.os }}
+        TARGET_ARCH: ${{ matrix.arch }}
+    - name: Save Artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: ccp-${{ matrix.os }}-${{ matrix.arch }}
+        path: bin/ccp
+
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    needs:
+      build
+    outputs:
+      uploadurl: ${{ steps.create-release.outputs.upload_url }}
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+      with:
+        ref: ${{ github.ref }}
+        fetch-depth: 0
+    - name: Tag
+      run: |
+        git config user.name github-actions
+        git config user.email github-actions@github.com
+        git tag -a ${{ needs.build.outputs.newversion }} -m ${{ needs.build.outputs.newversion }}
+        git push --tags
+    - name: Create Release
+      id: create-release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ needs.build.outputs.newversion }}
+        release_name: v${{ needs.build.outputs.newversion }}
+        draft: false
+        prerelease: false
+
+  upload-artifacts:
+    name: Upload Artifacts
+    runs-on: ubuntu-latest
+    needs:
+      release
+    strategy:
+      matrix:
+        os: [darwin, linux]
+        arch: [amd64]
+    steps:
+    - name: Download Artifact
+      uses: actions/download-artifact@v2
+      with:
+        name: ccp-${{ matrix.os }}-${{ matrix.arch }}
+    - name: Make Artifact Executable # See https://github.com/actions/upload-artifact/issues/38
+      run: chmod +x ./ccp
+    - name: Upload Asset
+      id: upload-asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ needs.release.outputs.uploadurl }}
+        asset_path: ./ccp
+        asset_name: ccp-${{ matrix.os }}-${{ matrix.arch }}
+        asset_content_type: "application"
