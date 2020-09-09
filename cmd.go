@@ -1,10 +1,10 @@
 package main
 
 import (
-	"ccp/git"
 	"fmt"
 	"os"
 
+	"github.com/mbamber/ccp/git"
 	"github.com/spf13/cobra"
 	"github.com/xfxdev/xlog"
 )

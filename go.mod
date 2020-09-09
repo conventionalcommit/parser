@@ -1,4 +1,4 @@
-module ccp
+module github.com/mbamber/ccp
 
 go 1.13
 

@@ -1,9 +1,9 @@
 package main_test
 
 import (
-	main "cov-commit-parser"
 	"testing"
 
+	main "github.com/mbamber/ccp"
 	"github.com/stretchr/testify/assert"
 )
 
