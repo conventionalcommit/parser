@@ -17,7 +17,7 @@ jobs:
         ref: ${{ github.ref }}
         fetch-depth: 0 # Include all history as we need that to determine the next version
     - name: Determine New Version
-      run: echo "::set-env name=NEW_VERSION::$(make local-version)"
+      run: echo "NEW_VERSION=$(make local-version)" >> $GITHUB_ENV
 
   build:
     name: Build
