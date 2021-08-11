@@ -2,9 +2,15 @@
 package parser
 
 import (
+	"errors"
 	"fmt"
 	"regexp"
 	"strings"
+)
+
+var (
+	errHeader    = errors.New("unable to parse commit header")
+	errNoNewLine = errors.New("commit description not followed by an empty line")
 )
 
 // Commit represents a commit that adheres to the conventional commits specification
@@ -65,7 +71,7 @@ func Parse(message string) (*Commit, error) {
 			}
 		case 1:
 			if msgLine != "" {
-				return commit, fmt.Errorf("commit description not followed by an empty line")
+				return commit, errNoNewLine
 			}
 		default:
 			key, value := parseLineAsFooter(msgLine)
@@ -146,7 +152,7 @@ func parseHeader(header string, commit *Commit) error {
 	// TODO: comma separated multiple scopes?
 	matches := headerRegexp.FindStringSubmatch(header)
 	if matches == nil {
-		return fmt.Errorf("unable to parse commit header: %s", header)
+		return errHeader
 	}
 
 	head := Header{
