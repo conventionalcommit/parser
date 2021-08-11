@@ -1,17 +1,17 @@
-package main_test
+package parser_test
 
 import (
 	"testing"
 
-	main "github.com/conventionalcommit/parser"
+	parser "github.com/conventionalcommit/parser"
 	"github.com/stretchr/testify/assert"
 )
 
-func parseMessageHelper(t *testing.T, dir string, expected main.ConventionalCommit) {
+func parseMessageHelper(t *testing.T, dir string, expected parser.ConventionalCommit) {
 	t.Helper()
 
 	commit := loadStringFromFile(t, dir)
-	out, err := main.ParseMessage(commit)
+	out, err := parser.ParseMessage(commit)
 	if assert.NoError(t, err) {
 		assert.Equal(t, expected, out)
 	}
@@ -40,14 +40,14 @@ This is the second line`
 	)
 
 	t.Run("description", func(t *testing.T) {
-		parseMessageHelper(t, dir, main.ConventionalCommit{
+		parseMessageHelper(t, dir, parser.ConventionalCommit{
 			CommitType:  commitType,
 			Description: commitDescription,
 			Footers:     emptyFooters,
 		})
 	})
 	t.Run("description scope", func(t *testing.T) {
-		parseMessageHelper(t, dir, main.ConventionalCommit{
+		parseMessageHelper(t, dir, parser.ConventionalCommit{
 			CommitScope: commitScope,
 			CommitType:  commitType,
 			Description: commitDescription,
@@ -55,7 +55,7 @@ This is the second line`
 		})
 	})
 	t.Run("breaking change description", func(t *testing.T) {
-		parseMessageHelper(t, dir, main.ConventionalCommit{
+		parseMessageHelper(t, dir, parser.ConventionalCommit{
 			BreakingChange: true,
 			CommitType:     commitType,
 			Description:    commitDescription,
@@ -63,7 +63,7 @@ This is the second line`
 		})
 	})
 	t.Run("breaking change description scope", func(t *testing.T) {
-		parseMessageHelper(t, dir, main.ConventionalCommit{
+		parseMessageHelper(t, dir, parser.ConventionalCommit{
 			BreakingChange: true,
 			CommitScope:    commitScope,
 			CommitType:     commitType,
@@ -72,7 +72,7 @@ This is the second line`
 		})
 	})
 	t.Run("description body", func(t *testing.T) {
-		parseMessageHelper(t, dir, main.ConventionalCommit{
+		parseMessageHelper(t, dir, parser.ConventionalCommit{
 			Body:        commitBody,
 			CommitType:  commitType,
 			Description: commitDescription,
@@ -80,7 +80,7 @@ This is the second line`
 		})
 	})
 	t.Run("description scope body", func(t *testing.T) {
-		parseMessageHelper(t, dir, main.ConventionalCommit{
+		parseMessageHelper(t, dir, parser.ConventionalCommit{
 			Body:        commitBody,
 			CommitScope: commitScope,
 			CommitType:  commitType,
@@ -89,7 +89,7 @@ This is the second line`
 		})
 	})
 	t.Run("breaking change description body", func(t *testing.T) {
-		parseMessageHelper(t, dir, main.ConventionalCommit{
+		parseMessageHelper(t, dir, parser.ConventionalCommit{
 			Body:           commitBody,
 			BreakingChange: true,
 			CommitType:     commitType,
@@ -98,7 +98,7 @@ This is the second line`
 		})
 	})
 	t.Run("breaking change description scope body", func(t *testing.T) {
-		parseMessageHelper(t, dir, main.ConventionalCommit{
+		parseMessageHelper(t, dir, parser.ConventionalCommit{
 			Body:           commitBody,
 			BreakingChange: true,
 			CommitScope:    commitScope,
@@ -108,14 +108,14 @@ This is the second line`
 		})
 	})
 	t.Run("description footers", func(t *testing.T) {
-		parseMessageHelper(t, dir, main.ConventionalCommit{
+		parseMessageHelper(t, dir, parser.ConventionalCommit{
 			CommitType:  commitType,
 			Description: commitDescription,
 			Footers:     commitFooters,
 		})
 	})
 	t.Run("description scope footers", func(t *testing.T) {
-		parseMessageHelper(t, dir, main.ConventionalCommit{
+		parseMessageHelper(t, dir, parser.ConventionalCommit{
 			CommitScope: commitScope,
 			CommitType:  commitType,
 			Description: commitDescription,
@@ -123,7 +123,7 @@ This is the second line`
 		})
 	})
 	t.Run("description body footers", func(t *testing.T) {
-		parseMessageHelper(t, dir, main.ConventionalCommit{
+		parseMessageHelper(t, dir, parser.ConventionalCommit{
 			Body:        commitBody,
 			CommitType:  commitType,
 			Description: commitDescription,
@@ -131,7 +131,7 @@ This is the second line`
 		})
 	})
 	t.Run("description scope body footers", func(t *testing.T) {
-		parseMessageHelper(t, dir, main.ConventionalCommit{
+		parseMessageHelper(t, dir, parser.ConventionalCommit{
 			Body:        commitBody,
 			CommitScope: commitScope,
 			CommitType:  commitType,
@@ -140,7 +140,7 @@ This is the second line`
 		})
 	})
 	t.Run("breaking change description footers", func(t *testing.T) {
-		parseMessageHelper(t, dir, main.ConventionalCommit{
+		parseMessageHelper(t, dir, parser.ConventionalCommit{
 			BreakingChange: true,
 			CommitType:     commitType,
 			Description:    commitDescription,
@@ -148,7 +148,7 @@ This is the second line`
 		})
 	})
 	t.Run("breaking change description body footers", func(t *testing.T) {
-		parseMessageHelper(t, dir, main.ConventionalCommit{
+		parseMessageHelper(t, dir, parser.ConventionalCommit{
 			Body:           commitBody,
 			BreakingChange: true,
 			CommitType:     commitType,
@@ -157,7 +157,7 @@ This is the second line`
 		})
 	})
 	t.Run("breaking change description scope footers", func(t *testing.T) {
-		parseMessageHelper(t, dir, main.ConventionalCommit{
+		parseMessageHelper(t, dir, parser.ConventionalCommit{
 			BreakingChange: true,
 			CommitScope:    commitScope,
 			CommitType:     commitType,
@@ -166,7 +166,7 @@ This is the second line`
 		})
 	})
 	t.Run("breaking change description scope body footers", func(t *testing.T) {
-		parseMessageHelper(t, dir, main.ConventionalCommit{
+		parseMessageHelper(t, dir, parser.ConventionalCommit{
 			Body:           commitBody,
 			BreakingChange: true,
 			CommitScope:    commitScope,
@@ -176,7 +176,7 @@ This is the second line`
 		})
 	})
 	t.Run("description footers breaking change", func(t *testing.T) {
-		parseMessageHelper(t, dir, main.ConventionalCommit{
+		parseMessageHelper(t, dir, parser.ConventionalCommit{
 			BreakingChange: true,
 			CommitType:     commitType,
 			Description:    commitDescription,
