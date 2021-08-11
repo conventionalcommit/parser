@@ -25,7 +25,7 @@ This is the second line`
 		commitDescription = "description message"
 		commitScope       = "scope"
 		commitType        = "type"
-		dir               = "test_fixtures/example_commits"
+		dir               = "testdata"
 	)
 
 	var (
