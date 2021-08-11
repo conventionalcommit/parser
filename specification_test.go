@@ -3,7 +3,7 @@ package main_test
 import (
 	"testing"
 
-	main "github.com/mbamber/ccp"
+	main "github.com/conventionalcommit/parser"
 	"github.com/stretchr/testify/assert"
 )
 

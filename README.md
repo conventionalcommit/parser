@@ -1,5 +1,5 @@
 # Cov Commit Parser
-![CD](https://github.com/mbamber/cov-commit-parser/workflows/CD/badge.svg)
+![CD](https://github.com/conventionalcommit/parser/workflows/CD/badge.svg)
 
 A simple parser for [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/).
 

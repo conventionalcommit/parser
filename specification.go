@@ -147,14 +147,3 @@ func parseHeader(header string, commit *ConventionalCommit) error {
 
 	return nil
 }
-
-// typeIsPatch returns true if the type represents a patch increment
-func typeIsPatch(t string, patchTypes []string) bool {
-	upperT := strings.ToUpper(t)
-	for _, patchType := range patchTypes {
-		if strings.ToUpper(patchType) == upperT {
-			return true
-		}
-	}
-	return false
-}
