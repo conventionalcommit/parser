@@ -176,3 +176,8 @@ func parseHeader(header string, commit *Commit) error {
 	commit.Header = head
 	return nil
 }
+
+// IsHeaderErr checks if given error is parser header error
+func IsHeaderErr(err error) bool {
+	return errors.Is(err, errHeader)
+}
