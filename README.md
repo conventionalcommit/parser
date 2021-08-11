@@ -2,6 +2,8 @@
 
 A simple go parser for [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/)
 
+[![PkgGoDev](https://pkg.go.dev/badge/github.com/conventionalcommit/parser)](https://pkg.go.dev/github.com/conventionalcommit/parser)
+
 ### Usage
 
 ```go
