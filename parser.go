@@ -44,7 +44,8 @@ func newFooterNote(token, value string) FooterNote {
 
 // Parse attempts to parse a commit message to a conventional commit
 func Parse(message string) (*Commit, error) {
-	messageLines := strings.Split(strings.TrimRight(message, "\n\t "), "\n")
+	message = strings.TrimRight(message, "\n\t ")
+	messageLines := strings.Split(message, "\n")
 
 	commit := &Commit{
 		FullCommit: message,
@@ -135,10 +136,14 @@ func parseLineAsFooter(line string) (key, value string) {
 
 // parseHeader attempts to parse the commit description line and set the appropriate values in the the given commit
 func parseHeader(header string, commit *Commit) error {
-	// allows /, \ in scope
-	headerRegexp := regexp.MustCompile(`^(?P<type>[A-Za-z]+)(?:\((?P<scope>[A-Za-z\/\\]+)\))?(?P<breaking>!)?: (?P<description>[\w| ]+)(?:\n\s*\n(?P<body>(?:.|\n)*)(?:\n\s+\n(?P<footers>(?:[A-Za-z-]+: (?:.|\n)*)|(?:BREAKING CHANGE: (?:.|\n)*)|(?:[A-Za-z]+ \#(?:.|\n)*)))?)?$`)
-	// TODO: comma separated multiple scopes?
+	// from https://github.com/conventional-commits/parser#the-grammar
 
+	// <header/summary> ::= <type>, "(", <scope>, ")", ["!"], ":", <whitespace>*, <text> <type>, ["!"], ":", <whitespace>*, <text>
+	// <type>  ::= <any UTF8-octets except newline or parens or ":" or "!:" or whitespace>+
+	// <scope> ::= <any UTF8-octets except newline or parens>+
+
+	headerRegexp := regexp.MustCompile(`^(?P<type>[^\n\(\)(:|!:| )]+)(?:\((?P<scope>[^\n\(\)]+)\))?(?P<breaking>!)?: (?P<description>[^\n]+)(?:\n\s*\n(?P<body>(?:.|\n)*)(?:\n\s+\n(?P<footers>(?:[A-Za-z-]+: (?:.|\n)*)|(?:BREAKING CHANGE: (?:.|\n)*)|(?:[A-Za-z]+ \#(?:.|\n)*)))?)?$`)
+	// TODO: comma separated multiple scopes?
 	matches := headerRegexp.FindStringSubmatch(header)
 	if matches == nil {
 		return fmt.Errorf("unable to parse commit header: %s", header)
