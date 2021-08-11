@@ -1,5 +1,6 @@
-MIT License
+The MIT License (MIT)
 
+Copyright (c) 2021 Muthu Krishnan
 Copyright (c) 2021 Matthew Bamber
 
 Permission is hereby granted, free of charge, to any person obtaining a copy

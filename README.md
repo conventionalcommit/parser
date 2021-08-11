@@ -1,27 +1,63 @@
-# Cov Commit Parser
-![CD](https://github.com/conventionalcommit/parser/workflows/CD/badge.svg)
+# Parser
 
-A simple parser for [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/).
+A simple go parser for [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/)
 
-## Usage
-When run without any arguments, `ccp version` will parse the commits at the current HEAD and output a single line containing a version number. This version number is the recommended version to use for the next build, based on the commit messages included since the latest tag on the branch.
+### Usage
 
-The current version number is determined by the tag representing the latest semantic version. This can be overridden using the `--current` flag.
-
-Use the `--since` flag to specify a commit hash, branch name or tag to adjust the commits used during the parsing.
-
-### Use as a library
-The tool can also be embedded into existing Go programs. The example below returns a new version based on the starting version `1.0.0` and using the single commit on the `HEAD` of a git repository in the directory `repo_path`:
 ```go
-commitMessages, err := git.GetCommitsInDirectory("repo_path", "HEAD~1", "HEAD")
+var msg = `feat(scope): description
+
+this is first line in body
+
+this is second line in body
+
+Ref: #123
+Date: 01-01-2021
+By: John Doe`
+
+commit, err := Parse(msg)
 if err != nil {
     fmt.Printf("Error: %s", err.Error())
 }
+fmt.Printf("%#v", commit)
 
-v, err := ccp.GetNextVersion("1.0.0", commitMessages, ccp.DefaultPatchTypes)
-if err != nil {
-    fmt.Printf("Error: %s", err.Error())
+/*
+commitMsg = &parser.Commit{
+  Header: parser.Header{
+    Type: "feat",
+    Scope: "scope",
+    Description: "description",
+    FullHeader: "feat(scope): description",
+  },
+  Body: "this is first line in body\n\nthis is second line in body",
+  Footer: parser.Footer{
+    Notes: []parser.FooterNote{
+      parser.FooterNote{
+        Token: "Ref",
+        Value: "#123",
+      },
+      parser.FooterNote{
+        Token: "Date",
+        Value: "01-01-2021",
+      },
+      parser.FooterNote{
+        Token: "By",
+        Value: "John Doe",
+      },
+    },
+    FullFooter: "Ref: #123\nDate: 01-01-2021\nBy: John Doe",
+  },
+  BreakingChange: false,
+  FullCommit: "feat(scope): description\n\nthis is first line in body\n\nthis is second line in body\n\nRef: #123\nDate: 01-01-2021\nBy: John Doe",
 }
-
-fmt.Println(v)
+*/
 ```
+
+### Fork
+
+This parser is a fork of [cov-commit-parser](github.com/mbamber/cov-commit-parser) by [Matthew Bamber](github.com/mbamber/)
+
+### License
+
+[MIT License](https://github.com/conventionalcommit/parser/tree/master/LICENSE.md)
+
