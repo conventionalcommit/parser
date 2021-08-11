@@ -1,186 +1,336 @@
 package parser_test
 
 import (
+	"os"
+	"path/filepath"
+	"strings"
 	"testing"
 
-	parser "github.com/conventionalcommit/parser"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/suite"
+
+	. "github.com/conventionalcommit/parser"
 )
 
-func parseMessageHelper(t *testing.T, dir string, expected parser.ConventionalCommit) {
+const (
+	commitBody = `This is a multiline commit body.
+
+This is the second line`
+)
+
+const (
+	commitDescription = "description message"
+	commitScope       = "scope"
+	commitType        = "type"
+
+	testDataDir = "testdata"
+)
+
+var breakingChangeFooter = Footer{
+	Notes: []FooterNote{
+		{
+			Token: "BREAKING CHANGE",
+			Value: "reason",
+		},
+	},
+}
+
+var commitFooters = Footer{
+	Notes: []FooterNote{
+		{
+			Token: "footer",
+			Value: "simple",
+		},
+		{
+			Token: "hash-footer",
+			Value: "123",
+		},
+	},
+}
+
+func TestParser(t *testing.T) {
+	ps := &parserSuite{}
+	suite.Run(t, ps)
+}
+
+type parserSuite struct {
+	suite.Suite
+}
+
+func (s *parserSuite) TestDescription() {
+	expectedCommit := &Commit{
+		Header: Header{
+			Type:        commitType,
+			Description: commitDescription,
+		},
+	}
+	s.parseMsgAndCompare("description", expectedCommit)
+}
+
+func (s *parserSuite) TestDescriptionScope() {
+	expectedCommit := &Commit{
+		Header: Header{
+			Type:        commitType,
+			Scope:       commitScope,
+			Description: commitDescription,
+		},
+	}
+	s.parseMsgAndCompare("description_scope", expectedCommit)
+}
+
+func (s *parserSuite) TestBreakingChangeDescription() {
+	expectedCommit := &Commit{
+		Header: Header{
+			Type:        commitType,
+			Description: commitDescription,
+		},
+		BreakingChange: true,
+	}
+	s.parseMsgAndCompare("breaking_change_description", expectedCommit)
+}
+
+func (s *parserSuite) TestBreakingChangeDescriptionScope() {
+	expectedCommit := &Commit{
+		Header: Header{
+			Type:        commitType,
+			Scope:       commitScope,
+			Description: commitDescription,
+		},
+		BreakingChange: true,
+	}
+	s.parseMsgAndCompare("breaking_change_description_scope", expectedCommit)
+}
+
+func (s *parserSuite) TestDescriptionBody() {
+	expectedCommit := &Commit{
+		Header: Header{
+			Type:        commitType,
+			Description: commitDescription,
+		},
+		Body: commitBody,
+	}
+	s.parseMsgAndCompare("description_body", expectedCommit)
+}
+
+func (s *parserSuite) TestDescriptionScopeBody() {
+	expectedCommit := &Commit{
+		Header: Header{
+			Type:        commitType,
+			Scope:       commitScope,
+			Description: commitDescription,
+		},
+		Body: commitBody,
+	}
+	s.parseMsgAndCompare("description_scope_body", expectedCommit)
+}
+
+func (s *parserSuite) TestBreakingChangeDescriptionBody() {
+	expectedCommit := &Commit{
+		Header: Header{
+			Type:        commitType,
+			Description: commitDescription,
+		},
+		Body:           commitBody,
+		BreakingChange: true,
+	}
+	s.parseMsgAndCompare("breaking_change_description_body", expectedCommit)
+}
+
+func (s *parserSuite) TestBreakingChangeDescriptionScopeBody() {
+	expectedCommit := &Commit{
+		Header: Header{
+			Type:        commitType,
+			Scope:       commitScope,
+			Description: commitDescription,
+		},
+		Body:           commitBody,
+		BreakingChange: true,
+	}
+	s.parseMsgAndCompare("breaking_change_description_scope_body", expectedCommit)
+}
+
+func (s *parserSuite) TestDescriptionFooters() {
+	expectedCommit := &Commit{
+		Header: Header{
+			Type:        commitType,
+			Description: commitDescription,
+		},
+		Footer: commitFooters,
+	}
+	s.parseMsgAndCompare("description_footers", expectedCommit)
+}
+
+func (s *parserSuite) TestDescriptionScopeFooters() {
+	expectedCommit := &Commit{
+		Header: Header{
+			Type:        commitType,
+			Scope:       commitScope,
+			Description: commitDescription,
+		},
+		Footer: commitFooters,
+	}
+	s.parseMsgAndCompare("description_scope_footers", expectedCommit)
+}
+
+func (s *parserSuite) TestDescriptionBodyFooters() {
+	expectedCommit := &Commit{
+		Header: Header{
+			Type:        commitType,
+			Description: commitDescription,
+		},
+		Body:   commitBody,
+		Footer: commitFooters,
+	}
+	s.parseMsgAndCompare("description_body_footers", expectedCommit)
+}
+
+func (s *parserSuite) TestDescriptionScopeBodyFooters() {
+	expectedCommit := &Commit{
+		Header: Header{
+			Type:        commitType,
+			Scope:       commitScope,
+			Description: commitDescription,
+		},
+		Body:   commitBody,
+		Footer: commitFooters,
+	}
+	s.parseMsgAndCompare("description_scope_body_footers", expectedCommit)
+}
+
+func (s *parserSuite) TestDescriptionFootersBreakingChange() {
+	expectedCommit := &Commit{
+		Header: Header{
+			Type:        commitType,
+			Description: commitDescription,
+		},
+		Footer:         breakingChangeFooter,
+		BreakingChange: true,
+	}
+	s.parseMsgAndCompare("description_footers_breaking_change", expectedCommit)
+}
+
+func (s *parserSuite) TestBreakingChangeDescriptionFooters() {
+	expectedCommit := &Commit{
+		BreakingChange: true,
+		Header: Header{
+			Type:        commitType,
+			Description: commitDescription,
+		},
+		Footer: commitFooters,
+	}
+	s.parseMsgAndCompare("breaking_change_description_footers", expectedCommit)
+}
+
+func (s *parserSuite) TestBreakingChangeDescriptionBodyFooters() {
+	expectedCommit := &Commit{
+		BreakingChange: true,
+		Header: Header{
+			Type:        commitType,
+			Description: commitDescription,
+		},
+		Body:   commitBody,
+		Footer: commitFooters,
+	}
+	s.parseMsgAndCompare("breaking_change_description_body_footers", expectedCommit)
+}
+
+func (s *parserSuite) TestBreakingChangeDescriptionScopeFooters() {
+	expectedCommit := &Commit{
+		Header: Header{
+			Type:        commitType,
+			Scope:       commitScope,
+			Description: commitDescription,
+		},
+		Footer:         commitFooters,
+		BreakingChange: true,
+	}
+	s.parseMsgAndCompare("breaking_change_description_scope_footers", expectedCommit)
+}
+
+func (s *parserSuite) TestBreakingChangeDescriptionScopeBodyFooters() {
+	expectedCommit := &Commit{
+		Header: Header{
+			Type:        commitType,
+			Scope:       commitScope,
+			Description: commitDescription,
+		},
+		Body:           commitBody,
+		Footer:         commitFooters,
+		BreakingChange: true,
+	}
+	s.parseMsgAndCompare("breaking_change_description_scope_body_footers", expectedCommit)
+}
+
+func (s *parserSuite) parseMsgAndCompare(fileName string, expectedCommit *Commit) {
+	t := s.T()
 	t.Helper()
 
-	commit := loadStringFromFile(t, dir)
-	out, err := parser.ParseMessage(commit)
-	if assert.NoError(t, err) {
-		assert.Equal(t, expected, out)
+	commitMsg := s.loadCommitMsgFromFile(filepath.Join(testDataDir, fileName))
+	actualCommit, err := Parse(commitMsg)
+	if err != nil {
+		t.Errorf("Received unexpected error:\n%+v", err)
+		return
+	}
+
+	if !s.compareCommit(actualCommit, expectedCommit) {
+		t.Errorf("Commit not equal :\n\tExpected: %v,\n\tActual: %v", expectedCommit, actualCommit)
+		return
 	}
 }
 
-func TestParseMessage(t *testing.T) {
-	const (
-		commitBody = `This is a multiline commit body.
+// loadCommitMsgFromFile loads a file and returns the entire contents as a string. Any
+// leading or trailing whitespace is removed
+func (s *parserSuite) loadCommitMsgFromFile(fileName string) string {
+	t := s.T()
+	t.Helper()
 
-This is the second line`
-		commitDescription = "description message"
-		commitScope       = "scope"
-		commitType        = "type"
-		dir               = "testdata"
-	)
+	out, err := os.ReadFile(fileName)
+	if err != nil {
+		assert.Failf(t, "error in test setup", "unable to load file %s", fileName)
+	}
+	return strings.TrimSpace(string(out))
+}
 
-	var (
-		breakingChangeFooter = map[string]string{
-			"BREAKING CHANGE": "reason",
+func (s *parserSuite) compareCommit(a, b *Commit) bool {
+	t := s.T()
+
+	if a.Header.Type != b.Header.Type {
+		t.Log("Header Type Not Equal")
+		return false
+	}
+	if a.Header.Description != b.Header.Description {
+		t.Log("Header Description Not Equal")
+		return false
+	}
+	if a.Header.Scope != b.Header.Scope {
+		t.Log("Header Scope Not Equal")
+		return false
+	}
+
+	if a.Body != b.Body {
+		t.Log("Body Not Equal")
+		return false
+	}
+
+	notesA := a.Footer.Notes
+	notesB := b.Footer.Notes
+
+	if len(notesA) != len(notesB) {
+		t.Log("Footer Notes Not Equal")
+		return false
+	}
+
+	for index, aFoot := range notesA {
+		bFoot := notesB[index]
+		if aFoot.Token != bFoot.Token {
+			t.Log("Footer Notes Token Not Equal", index, aFoot.Token, bFoot.Token)
+			return false
 		}
-		commitFooters = map[string]string{
-			"footer":      "simple",
-			"hash-footer": "123",
+		if aFoot.Value != bFoot.Value {
+			t.Log("Footer Notes Value Not Equal", index, aFoot.Value, bFoot.Value)
+			return false
 		}
-		emptyFooters = map[string]string{}
-	)
+	}
 
-	t.Run("description", func(t *testing.T) {
-		parseMessageHelper(t, dir, parser.ConventionalCommit{
-			CommitType:  commitType,
-			Description: commitDescription,
-			Footers:     emptyFooters,
-		})
-	})
-	t.Run("description scope", func(t *testing.T) {
-		parseMessageHelper(t, dir, parser.ConventionalCommit{
-			CommitScope: commitScope,
-			CommitType:  commitType,
-			Description: commitDescription,
-			Footers:     emptyFooters,
-		})
-	})
-	t.Run("breaking change description", func(t *testing.T) {
-		parseMessageHelper(t, dir, parser.ConventionalCommit{
-			BreakingChange: true,
-			CommitType:     commitType,
-			Description:    commitDescription,
-			Footers:        emptyFooters,
-		})
-	})
-	t.Run("breaking change description scope", func(t *testing.T) {
-		parseMessageHelper(t, dir, parser.ConventionalCommit{
-			BreakingChange: true,
-			CommitScope:    commitScope,
-			CommitType:     commitType,
-			Description:    commitDescription,
-			Footers:        emptyFooters,
-		})
-	})
-	t.Run("description body", func(t *testing.T) {
-		parseMessageHelper(t, dir, parser.ConventionalCommit{
-			Body:        commitBody,
-			CommitType:  commitType,
-			Description: commitDescription,
-			Footers:     emptyFooters,
-		})
-	})
-	t.Run("description scope body", func(t *testing.T) {
-		parseMessageHelper(t, dir, parser.ConventionalCommit{
-			Body:        commitBody,
-			CommitScope: commitScope,
-			CommitType:  commitType,
-			Description: commitDescription,
-			Footers:     emptyFooters,
-		})
-	})
-	t.Run("breaking change description body", func(t *testing.T) {
-		parseMessageHelper(t, dir, parser.ConventionalCommit{
-			Body:           commitBody,
-			BreakingChange: true,
-			CommitType:     commitType,
-			Description:    commitDescription,
-			Footers:        emptyFooters,
-		})
-	})
-	t.Run("breaking change description scope body", func(t *testing.T) {
-		parseMessageHelper(t, dir, parser.ConventionalCommit{
-			Body:           commitBody,
-			BreakingChange: true,
-			CommitScope:    commitScope,
-			CommitType:     commitType,
-			Description:    commitDescription,
-			Footers:        emptyFooters,
-		})
-	})
-	t.Run("description footers", func(t *testing.T) {
-		parseMessageHelper(t, dir, parser.ConventionalCommit{
-			CommitType:  commitType,
-			Description: commitDescription,
-			Footers:     commitFooters,
-		})
-	})
-	t.Run("description scope footers", func(t *testing.T) {
-		parseMessageHelper(t, dir, parser.ConventionalCommit{
-			CommitScope: commitScope,
-			CommitType:  commitType,
-			Description: commitDescription,
-			Footers:     commitFooters,
-		})
-	})
-	t.Run("description body footers", func(t *testing.T) {
-		parseMessageHelper(t, dir, parser.ConventionalCommit{
-			Body:        commitBody,
-			CommitType:  commitType,
-			Description: commitDescription,
-			Footers:     commitFooters,
-		})
-	})
-	t.Run("description scope body footers", func(t *testing.T) {
-		parseMessageHelper(t, dir, parser.ConventionalCommit{
-			Body:        commitBody,
-			CommitScope: commitScope,
-			CommitType:  commitType,
-			Description: commitDescription,
-			Footers:     commitFooters,
-		})
-	})
-	t.Run("breaking change description footers", func(t *testing.T) {
-		parseMessageHelper(t, dir, parser.ConventionalCommit{
-			BreakingChange: true,
-			CommitType:     commitType,
-			Description:    commitDescription,
-			Footers:        commitFooters,
-		})
-	})
-	t.Run("breaking change description body footers", func(t *testing.T) {
-		parseMessageHelper(t, dir, parser.ConventionalCommit{
-			Body:           commitBody,
-			BreakingChange: true,
-			CommitType:     commitType,
-			Description:    commitDescription,
-			Footers:        commitFooters,
-		})
-	})
-	t.Run("breaking change description scope footers", func(t *testing.T) {
-		parseMessageHelper(t, dir, parser.ConventionalCommit{
-			BreakingChange: true,
-			CommitScope:    commitScope,
-			CommitType:     commitType,
-			Description:    commitDescription,
-			Footers:        commitFooters,
-		})
-	})
-	t.Run("breaking change description scope body footers", func(t *testing.T) {
-		parseMessageHelper(t, dir, parser.ConventionalCommit{
-			Body:           commitBody,
-			BreakingChange: true,
-			CommitScope:    commitScope,
-			CommitType:     commitType,
-			Description:    commitDescription,
-			Footers:        commitFooters,
-		})
-	})
-	t.Run("description footers breaking change", func(t *testing.T) {
-		parseMessageHelper(t, dir, parser.ConventionalCommit{
-			BreakingChange: true,
-			CommitType:     commitType,
-			Description:    commitDescription,
-			Footers:        breakingChangeFooter,
-		})
-	})
+	return true
 }
