@@ -13,9 +13,10 @@ import (
 // <header/summary> ::= <type>, "(", <scope>, ")", ["!"], ":", <whitespace>*, <text> <type>, ["!"], ":", <whitespace>*, <text>
 // <type>  ::= <any UTF8-octets except newline or parens or ":" or "!:" or whitespace>+
 // <scope> ::= <any UTF8-octets except newline or parens>+
+// <description> ::= <any UTF8-octets except newline>*
 
 const (
-	headRegExStr = `^(?P<type>[^\n\(\)(:|!:| )]+)(?:\((?P<scope>[^\n\(\)]+)\))?(?P<breaking>!)?: (?P<description>[^\n]+)(?:\n\s*\n(?P<body>(?:.|\n)*)(?:\n\s+\n(?P<footers>(?:[A-Za-z-]+: (?:.|\n)*)|(?:BREAKING CHANGE: (?:.|\n)*)|(?:[A-Za-z]+ \#(?:.|\n)*)))?)?$`
+	headRegExStr = `^(?P<type>[^\n\(\)(:|!:| )]+)(?:\((?P<scope>[^\n\(\)]+)\))?(?P<breaking>!)?: (?P<description>[^\n]+)$`
 	footRegExStr = `^(?:(BREAKING[- ]CHANGE|(?:[A-Za-z-])+): |((?:[A-Za-z-])+) #)(.+)$`
 )
 
