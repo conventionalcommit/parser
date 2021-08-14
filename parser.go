@@ -8,6 +8,22 @@ import (
 	"strings"
 )
 
+// from https://github.com/conventional-commits/parser#the-grammar
+
+// <header/summary> ::= <type>, "(", <scope>, ")", ["!"], ":", <whitespace>*, <text> <type>, ["!"], ":", <whitespace>*, <text>
+// <type>  ::= <any UTF8-octets except newline or parens or ":" or "!:" or whitespace>+
+// <scope> ::= <any UTF8-octets except newline or parens>+
+
+const (
+	headRegExStr = `^(?P<type>[^\n\(\)(:|!:| )]+)(?:\((?P<scope>[^\n\(\)]+)\))?(?P<breaking>!)?: (?P<description>[^\n]+)(?:\n\s*\n(?P<body>(?:.|\n)*)(?:\n\s+\n(?P<footers>(?:[A-Za-z-]+: (?:.|\n)*)|(?:BREAKING CHANGE: (?:.|\n)*)|(?:[A-Za-z]+ \#(?:.|\n)*)))?)?$`
+	footRegExStr = `^(?:(BREAKING[- ]CHANGE|(?:[A-Za-z-])+): |((?:[A-Za-z-])+) #)(.+)$`
+)
+
+var (
+	headerRegexp = regexp.MustCompile(headRegExStr)
+	footerRegexp = regexp.MustCompile(footRegExStr)
+)
+
 var (
 	errHeader    = errors.New("unable to parse commit header")
 	errNoNewLine = errors.New("commit description not followed by an empty line")
@@ -93,7 +109,6 @@ func Parse(message string) (*Commit, error) {
 // parseLineAsFooter attempts to parse the given line as a footer, returning both the key and the value of the header.
 // If the line cannot be parsed then both return values will be empty.
 func parseLineAsFooter(line string) (key, value string) {
-	footerRegexp := regexp.MustCompile(`^(?:(BREAKING[- ]CHANGE|(?:[A-Za-z-])+): |((?:[A-Za-z-])+) #)(.+)$`)
 	matches := footerRegexp.FindStringSubmatch(line)
 	if len(matches) != 4 {
 		return "", ""
@@ -107,14 +122,6 @@ func parseLineAsFooter(line string) (key, value string) {
 
 // parseHeader attempts to parse the commit description line and set the appropriate values in the the given commit
 func parseHeader(header string, commit *Commit) error {
-	// from https://github.com/conventional-commits/parser#the-grammar
-
-	// <header/summary> ::= <type>, "(", <scope>, ")", ["!"], ":", <whitespace>*, <text> <type>, ["!"], ":", <whitespace>*, <text>
-	// <type>  ::= <any UTF8-octets except newline or parens or ":" or "!:" or whitespace>+
-	// <scope> ::= <any UTF8-octets except newline or parens>+
-
-	headerRegexp := regexp.MustCompile(`^(?P<type>[^\n\(\)(:|!:| )]+)(?:\((?P<scope>[^\n\(\)]+)\))?(?P<breaking>!)?: (?P<description>[^\n]+)(?:\n\s*\n(?P<body>(?:.|\n)*)(?:\n\s+\n(?P<footers>(?:[A-Za-z-]+: (?:.|\n)*)|(?:BREAKING CHANGE: (?:.|\n)*)|(?:[A-Za-z]+ \#(?:.|\n)*)))?)?$`)
-	// TODO: comma separated multiple scopes?
 	matches := headerRegexp.FindStringSubmatch(header)
 	if matches == nil {
 		return errHeader
@@ -130,6 +137,7 @@ func parseHeader(header string, commit *Commit) error {
 		case "type":
 			head.Type = match
 		case "scope":
+			// TODO: comma separated multiple scopes?
 			head.Scope = match
 		case "description":
 			head.Description = match
@@ -142,7 +150,7 @@ func parseHeader(header string, commit *Commit) error {
 	return nil
 }
 
-// IsHeaderErr checks if given error is parser header error
+// IsHeaderErr checks if given error is header parse error
 func IsHeaderErr(err error) bool {
 	return errors.Is(err, errHeader)
 }
