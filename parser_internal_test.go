@@ -2,6 +2,7 @@ package parser
 
 import (
 	"strconv"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -21,11 +22,13 @@ func TestParseHeaderValid(t *testing.T) {
 	}
 
 	for index, validCase := range validCases {
+
 		testName := "case#" + strconv.Itoa(index+1)
 		t.Run(testName, func(innerT *testing.T) {
+			headerLine := strings.Split(validCase, "\n")[0]
 			commit := &Commit{}
-			err := parseHeader(validCase, commit)
-			assert.NoError(innerT, err, validCase)
+			err := parseHeader(headerLine, commit)
+			assert.NoError(innerT, err, headerLine)
 		})
 	}
 }
@@ -47,9 +50,10 @@ func TestParseHeaderInvalid(t *testing.T) {
 	for index, validCase := range validCases {
 		testName := "case#" + strconv.Itoa(index+1)
 		t.Run(testName, func(innerT *testing.T) {
+			headerLine := strings.Split(validCase, "\n")[0]
 			commit := &Commit{}
-			err := parseHeader(validCase, commit)
-			assert.Error(innerT, err, validCase)
+			err := parseHeader(headerLine, commit)
+			assert.Error(innerT, err, headerLine)
 		})
 	}
 }
