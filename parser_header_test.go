@@ -4,8 +4,6 @@ import (
 	"strconv"
 	"strings"
 	"testing"
-
-	"github.com/stretchr/testify/assert"
 )
 
 func TestParseHeaderValid(t *testing.T) {
@@ -28,7 +26,10 @@ func TestParseHeaderValid(t *testing.T) {
 			headerLine := strings.Split(validCase, "\n")[0]
 			commit := &Commit{}
 			err := parseHeader(headerLine, commit)
-			assert.NoError(innerT, err, headerLine)
+			if err != nil {
+				innerT.Error("parseHeader failed for", headerLine, err)
+				return
+			}
 		})
 	}
 }
@@ -53,7 +54,9 @@ func TestParseHeaderInvalid(t *testing.T) {
 			headerLine := strings.Split(validCase, "\n")[0]
 			commit := &Commit{}
 			err := parseHeader(headerLine, commit)
-			assert.Error(innerT, err, headerLine)
+			if err == nil {
+				innerT.Error("parseHeader passed without error for", headerLine)
+			}
 		})
 	}
 }
