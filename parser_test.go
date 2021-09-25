@@ -7,7 +7,6 @@ import (
 	"testing"
 
 	"github.com/conventionalcommit/parser"
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -39,6 +38,21 @@ var commitFooters = parser.Footer{
 		{
 			Token: "footer",
 			Value: "simple",
+		},
+		{
+			Token: "hash-footer",
+			Value: "123",
+		},
+	},
+}
+
+var multiLineFooters = parser.Footer{
+	Notes: []parser.FooterNote{
+		{
+			Token: "footer",
+			Value: `multi line footer
+message is here
+`,
 		},
 		{
 			Token: "hash-footer",
@@ -260,6 +274,51 @@ func (s *parserSuite) TestBreakingChangeDescriptionScopeBodyFooters() {
 	s.parseMsgAndCompare("breaking_change_description_scope_body_footers", expectedCommit)
 }
 
+func (s *parserSuite) TestFooterMultiLine() {
+	expectedCommit := &parser.Commit{
+		Header: parser.Header{
+			Type:        commitType,
+			Description: commitDescription,
+		},
+		Footer: multiLineFooters,
+	}
+	s.parseMsgAndCompare("footer_multi_line", expectedCommit)
+}
+
+func (s *parserSuite) TestErrNoBlankLine() {
+	t := s.T()
+
+	fileName := "err_no_blank_line"
+
+	commitMsg := s.loadCommitMsgFromFile(filepath.Join(testDataDir, fileName))
+	_, err := parser.Parse(commitMsg)
+	if err == nil {
+		t.Errorf("no error: test file %v passed", fileName)
+		return
+	}
+
+	if !parser.IsNoBlankLineErr(err) {
+		t.Error("error is not NoBlankLineErr error", err)
+	}
+}
+
+func (s *parserSuite) TestErrHeaderLine() {
+	t := s.T()
+
+	fileName := "err_header_line"
+
+	commitMsg := s.loadCommitMsgFromFile(filepath.Join(testDataDir, fileName))
+	_, err := parser.Parse(commitMsg)
+	if err == nil {
+		t.Errorf("no error: test file %v passed", fileName)
+		return
+	}
+
+	if !parser.IsHeaderErr(err) {
+		t.Error("error is not HeaderErr error", err)
+	}
+}
+
 func (s *parserSuite) parseMsgAndCompare(fileName string, expectedCommit *parser.Commit) {
 	t := s.T()
 	t.Helper()
@@ -285,7 +344,7 @@ func (s *parserSuite) loadCommitMsgFromFile(fileName string) string {
 
 	out, err := os.ReadFile(fileName)
 	if err != nil {
-		assert.Failf(t, "error in test setup", "unable to load file %s", fileName)
+		t.Errorf("error in test setup; unable to load file %s", fileName)
 	}
 	return strings.TrimSpace(string(out))
 }
