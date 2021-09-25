@@ -45,39 +45,47 @@ func Parse(message string) (*Commit, error) {
 
 	inFooters := false
 	for i, msgLine := range messageLines {
-		switch i {
-		case 0:
-			err := parseHeader(msgLine, commit)
+		// First Line
+		if i == 0 {
+			head, isBreak, err := parseHeader(msgLine)
 			if err != nil {
-				return commit, err
+				return nil, err
 			}
-		case 1:
+			commit.Header = head
+			commit.BreakingChange = isBreak
+			continue
+		}
+
+		// Second Line
+		if i == 1 {
 			if msgLine != "" {
-				return commit, errNoBlankLine
+				return nil, errNoBlankLine
 			}
-		default:
-			key, value := parseLineAsFooter(msgLine)
+			continue
+		}
 
-			if key != "" && value != "" {
-				inFooters = true
+		// Remaining Line
+		key, value, isFooter := parseLineAsFooter(msgLine)
+		if isFooter {
+			inFooters = true
 
-				// Check if we have previously found a footer. If we have, set the current footer,
-				// otherwise just record it.
-				if currKeyValue != "" {
-					foot.Notes = append(foot.Notes, newFooterNote(currKeyValue, currFooterValue))
-					foot.FullFooter += messageLines[i-1] + "\n" // add previous line to FullFooter
-				}
-				currKeyValue = key
-				currFooterValue = value
+			// Check if we have previously found a footer. If we have, set the current footer,
+			// otherwise just record it.
+			if currKeyValue != "" {
+				foot.Notes = append(foot.Notes, newFooterNote(currKeyValue, currFooterValue))
+				foot.FullFooter += messageLines[i-1] + "\n" // add previous line to FullFooter
+			}
+
+			currKeyValue = key
+			currFooterValue = value
+		} else {
+			if inFooters {
+				currFooterValue = fmt.Sprintf("%s\n%s", currFooterValue, msgLine)
 			} else {
-				if inFooters {
-					currFooterValue = fmt.Sprintf("%s\n%s", currFooterValue, msgLine)
+				if commit.Body == "" {
+					commit.Body = msgLine
 				} else {
-					if commit.Body == "" {
-						commit.Body = msgLine
-					} else {
-						commit.Body += fmt.Sprintf("\n%s", msgLine)
-					}
+					commit.Body += fmt.Sprintf("\n%s", msgLine)
 				}
 			}
 		}
@@ -96,7 +104,7 @@ func Parse(message string) (*Commit, error) {
 	commit.Body = strings.TrimSpace(commit.Body)
 	commit.Footer = foot
 
-	// Check if a footer contained a breaking change
+	// Check if a footer contains a breaking change
 	for _, footer := range commit.Footer.Notes {
 		if footer.Token == "BREAKING CHANGE" || footer.Token == "BREAKING-CHANGE" {
 			commit.BreakingChange = true
@@ -108,29 +116,31 @@ func Parse(message string) (*Commit, error) {
 }
 
 // parseLineAsFooter attempts to parse the given line as a footer, returning both the key and the value of the header.
-// If the line cannot be parsed then both return values will be empty.
-func parseLineAsFooter(line string) (key, value string) {
+// If the line cannot be parsed then isFooter is false
+func parseLineAsFooter(line string) (key, value string, isFooter bool) {
 	matches := footerRegexp.FindStringSubmatch(line)
 	if len(matches) != 4 {
-		return "", ""
+		return "", "", false
 	}
 
 	if matches[1] == "" {
-		return matches[2], matches[3]
+		return matches[2], matches[3], true
 	}
-	return matches[1], matches[3]
+	return matches[1], matches[3], true
 }
 
 // parseHeader attempts to parse the commit description line and set the appropriate values in the the given commit
-func parseHeader(header string, commit *Commit) error {
+func parseHeader(header string) (Header, bool, error) {
 	matches := headerRegexp.FindStringSubmatch(header)
 	if matches == nil {
-		return errHeader
+		return Header{}, false, errHeader
 	}
 
 	head := Header{
 		FullHeader: header,
 	}
+
+	isBreakingChange := false
 
 	names := headerRegexp.SubexpNames()
 	for i, match := range matches {
@@ -143,12 +153,11 @@ func parseHeader(header string, commit *Commit) error {
 		case "description":
 			head.Description = match
 		case "breaking":
-			commit.BreakingChange = (match == "!")
+			isBreakingChange = (match == "!")
 		}
 	}
 
-	commit.Header = head
-	return nil
+	return head, isBreakingChange, nil
 }
 
 // IsHeaderErr checks if given error is header parse error

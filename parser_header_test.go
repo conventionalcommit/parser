@@ -24,8 +24,7 @@ func TestParseHeaderValid(t *testing.T) {
 		testName := "case#" + strconv.Itoa(index+1)
 		t.Run(testName, func(innerT *testing.T) {
 			headerLine := strings.Split(validCase, "\n")[0]
-			commit := &Commit{}
-			err := parseHeader(headerLine, commit)
+			_, _, err := parseHeader(headerLine)
 			if err != nil {
 				innerT.Error("parseHeader failed for", headerLine, err)
 				return
@@ -52,8 +51,7 @@ func TestParseHeaderInvalid(t *testing.T) {
 		testName := "case#" + strconv.Itoa(index+1)
 		t.Run(testName, func(innerT *testing.T) {
 			headerLine := strings.Split(validCase, "\n")[0]
-			commit := &Commit{}
-			err := parseHeader(headerLine, commit)
+			_, _, err := parseHeader(headerLine)
 			if err == nil {
 				innerT.Error("parseHeader passed without error for", headerLine)
 			}
