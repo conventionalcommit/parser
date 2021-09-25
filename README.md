@@ -1,6 +1,6 @@
 # Parser
 
-A simple go parser for [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/)
+go parser for [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/)
 
 [![PkgGoDev](https://pkg.go.dev/badge/github.com/conventionalcommit/parser)](https://pkg.go.dev/github.com/conventionalcommit/parser)
 
@@ -13,7 +13,7 @@ this is first line in body
 
 this is second line in body
 
-Ref: #123
+Ref #123
 Date: 01-01-2021
 By: John Doe`
 
@@ -36,7 +36,7 @@ commitMsg = &parser.Commit{
     Notes: []parser.FooterNote{
       parser.FooterNote{
         Token: "Ref",
-        Value: "#123",
+        Value: "123",
       },
       parser.FooterNote{
         Token: "Date",
@@ -47,10 +47,10 @@ commitMsg = &parser.Commit{
         Value: "John Doe",
       },
     },
-    FullFooter: "Ref: #123\nDate: 01-01-2021\nBy: John Doe",
+    FullFooter: "Ref #123\nDate: 01-01-2021\nBy: John Doe",
   },
   BreakingChange: false,
-  FullCommit: "feat(scope): description\n\nthis is first line in body\n\nthis is second line in body\n\nRef: #123\nDate: 01-01-2021\nBy: John Doe",
+  FullCommit: "feat(scope): description\n\nthis is first line in body\n\nthis is second line in body\n\nRef #123\nDate: 01-01-2021\nBy: John Doe",
 }
 */
 ```
