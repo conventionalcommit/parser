@@ -6,10 +6,9 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/conventionalcommit/parser"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
-
-	. "github.com/conventionalcommit/parser"
 )
 
 const (
@@ -26,8 +25,8 @@ const (
 	testDataDir = "testdata"
 )
 
-var breakingChangeFooter = Footer{
-	Notes: []FooterNote{
+var breakingChangeFooter = parser.Footer{
+	Notes: []parser.FooterNote{
 		{
 			Token: "BREAKING CHANGE",
 			Value: "reason",
@@ -35,8 +34,8 @@ var breakingChangeFooter = Footer{
 	},
 }
 
-var commitFooters = Footer{
-	Notes: []FooterNote{
+var commitFooters = parser.Footer{
+	Notes: []parser.FooterNote{
 		{
 			Token: "footer",
 			Value: "simple",
@@ -58,8 +57,8 @@ type parserSuite struct {
 }
 
 func (s *parserSuite) TestDescription() {
-	expectedCommit := &Commit{
-		Header: Header{
+	expectedCommit := &parser.Commit{
+		Header: parser.Header{
 			Type:        commitType,
 			Description: commitDescription,
 		},
@@ -68,8 +67,8 @@ func (s *parserSuite) TestDescription() {
 }
 
 func (s *parserSuite) TestDescriptionScope() {
-	expectedCommit := &Commit{
-		Header: Header{
+	expectedCommit := &parser.Commit{
+		Header: parser.Header{
 			Type:        commitType,
 			Scope:       commitScope,
 			Description: commitDescription,
@@ -79,8 +78,8 @@ func (s *parserSuite) TestDescriptionScope() {
 }
 
 func (s *parserSuite) TestBreakingChangeDescription() {
-	expectedCommit := &Commit{
-		Header: Header{
+	expectedCommit := &parser.Commit{
+		Header: parser.Header{
 			Type:        commitType,
 			Description: commitDescription,
 		},
@@ -90,8 +89,8 @@ func (s *parserSuite) TestBreakingChangeDescription() {
 }
 
 func (s *parserSuite) TestBreakingChangeDescriptionScope() {
-	expectedCommit := &Commit{
-		Header: Header{
+	expectedCommit := &parser.Commit{
+		Header: parser.Header{
 			Type:        commitType,
 			Scope:       commitScope,
 			Description: commitDescription,
@@ -102,8 +101,8 @@ func (s *parserSuite) TestBreakingChangeDescriptionScope() {
 }
 
 func (s *parserSuite) TestDescriptionBody() {
-	expectedCommit := &Commit{
-		Header: Header{
+	expectedCommit := &parser.Commit{
+		Header: parser.Header{
 			Type:        commitType,
 			Description: commitDescription,
 		},
@@ -113,8 +112,8 @@ func (s *parserSuite) TestDescriptionBody() {
 }
 
 func (s *parserSuite) TestDescriptionScopeBody() {
-	expectedCommit := &Commit{
-		Header: Header{
+	expectedCommit := &parser.Commit{
+		Header: parser.Header{
 			Type:        commitType,
 			Scope:       commitScope,
 			Description: commitDescription,
@@ -125,8 +124,8 @@ func (s *parserSuite) TestDescriptionScopeBody() {
 }
 
 func (s *parserSuite) TestBreakingChangeDescriptionBody() {
-	expectedCommit := &Commit{
-		Header: Header{
+	expectedCommit := &parser.Commit{
+		Header: parser.Header{
 			Type:        commitType,
 			Description: commitDescription,
 		},
@@ -137,8 +136,8 @@ func (s *parserSuite) TestBreakingChangeDescriptionBody() {
 }
 
 func (s *parserSuite) TestBreakingChangeDescriptionScopeBody() {
-	expectedCommit := &Commit{
-		Header: Header{
+	expectedCommit := &parser.Commit{
+		Header: parser.Header{
 			Type:        commitType,
 			Scope:       commitScope,
 			Description: commitDescription,
@@ -150,8 +149,8 @@ func (s *parserSuite) TestBreakingChangeDescriptionScopeBody() {
 }
 
 func (s *parserSuite) TestDescriptionFooters() {
-	expectedCommit := &Commit{
-		Header: Header{
+	expectedCommit := &parser.Commit{
+		Header: parser.Header{
 			Type:        commitType,
 			Description: commitDescription,
 		},
@@ -161,8 +160,8 @@ func (s *parserSuite) TestDescriptionFooters() {
 }
 
 func (s *parserSuite) TestDescriptionScopeFooters() {
-	expectedCommit := &Commit{
-		Header: Header{
+	expectedCommit := &parser.Commit{
+		Header: parser.Header{
 			Type:        commitType,
 			Scope:       commitScope,
 			Description: commitDescription,
@@ -173,8 +172,8 @@ func (s *parserSuite) TestDescriptionScopeFooters() {
 }
 
 func (s *parserSuite) TestDescriptionBodyFooters() {
-	expectedCommit := &Commit{
-		Header: Header{
+	expectedCommit := &parser.Commit{
+		Header: parser.Header{
 			Type:        commitType,
 			Description: commitDescription,
 		},
@@ -185,8 +184,8 @@ func (s *parserSuite) TestDescriptionBodyFooters() {
 }
 
 func (s *parserSuite) TestDescriptionScopeBodyFooters() {
-	expectedCommit := &Commit{
-		Header: Header{
+	expectedCommit := &parser.Commit{
+		Header: parser.Header{
 			Type:        commitType,
 			Scope:       commitScope,
 			Description: commitDescription,
@@ -198,8 +197,8 @@ func (s *parserSuite) TestDescriptionScopeBodyFooters() {
 }
 
 func (s *parserSuite) TestDescriptionFootersBreakingChange() {
-	expectedCommit := &Commit{
-		Header: Header{
+	expectedCommit := &parser.Commit{
+		Header: parser.Header{
 			Type:        commitType,
 			Description: commitDescription,
 		},
@@ -210,9 +209,9 @@ func (s *parserSuite) TestDescriptionFootersBreakingChange() {
 }
 
 func (s *parserSuite) TestBreakingChangeDescriptionFooters() {
-	expectedCommit := &Commit{
+	expectedCommit := &parser.Commit{
 		BreakingChange: true,
-		Header: Header{
+		Header: parser.Header{
 			Type:        commitType,
 			Description: commitDescription,
 		},
@@ -222,9 +221,9 @@ func (s *parserSuite) TestBreakingChangeDescriptionFooters() {
 }
 
 func (s *parserSuite) TestBreakingChangeDescriptionBodyFooters() {
-	expectedCommit := &Commit{
+	expectedCommit := &parser.Commit{
 		BreakingChange: true,
-		Header: Header{
+		Header: parser.Header{
 			Type:        commitType,
 			Description: commitDescription,
 		},
@@ -235,8 +234,8 @@ func (s *parserSuite) TestBreakingChangeDescriptionBodyFooters() {
 }
 
 func (s *parserSuite) TestBreakingChangeDescriptionScopeFooters() {
-	expectedCommit := &Commit{
-		Header: Header{
+	expectedCommit := &parser.Commit{
+		Header: parser.Header{
 			Type:        commitType,
 			Scope:       commitScope,
 			Description: commitDescription,
@@ -248,8 +247,8 @@ func (s *parserSuite) TestBreakingChangeDescriptionScopeFooters() {
 }
 
 func (s *parserSuite) TestBreakingChangeDescriptionScopeBodyFooters() {
-	expectedCommit := &Commit{
-		Header: Header{
+	expectedCommit := &parser.Commit{
+		Header: parser.Header{
 			Type:        commitType,
 			Scope:       commitScope,
 			Description: commitDescription,
@@ -261,12 +260,12 @@ func (s *parserSuite) TestBreakingChangeDescriptionScopeBodyFooters() {
 	s.parseMsgAndCompare("breaking_change_description_scope_body_footers", expectedCommit)
 }
 
-func (s *parserSuite) parseMsgAndCompare(fileName string, expectedCommit *Commit) {
+func (s *parserSuite) parseMsgAndCompare(fileName string, expectedCommit *parser.Commit) {
 	t := s.T()
 	t.Helper()
 
 	commitMsg := s.loadCommitMsgFromFile(filepath.Join(testDataDir, fileName))
-	actualCommit, err := Parse(commitMsg)
+	actualCommit, err := parser.Parse(commitMsg)
 	if err != nil {
 		t.Errorf("Received unexpected error:\n%+v", err)
 		return
@@ -291,7 +290,7 @@ func (s *parserSuite) loadCommitMsgFromFile(fileName string) string {
 	return strings.TrimSpace(string(out))
 }
 
-func (s *parserSuite) compareCommit(a, b *Commit) bool {
+func (s *parserSuite) compareCommit(a, b *parser.Commit) bool {
 	t := s.T()
 
 	if a.Header.Type != b.Header.Type {
