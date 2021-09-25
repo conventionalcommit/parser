@@ -1,9 +1,7 @@
-package parser_test
+package parser
 
 import (
 	"testing"
-
-	"github.com/conventionalcommit/parser"
 )
 
 var sampleCommit = `feat(scope): description
@@ -27,7 +25,7 @@ By: John Doe`
 
 func BenchmarkParser(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		_, err := parser.Parse(sampleCommit)
+		_, err := Parse(sampleCommit)
 		if err != nil {
 			b.Fatal(err)
 		}
