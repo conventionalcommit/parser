@@ -26,8 +26,8 @@ var (
 )
 
 var (
-	errHeader    = errors.New("unable to parse commit header")
-	errNoNewLine = errors.New("commit description not followed by an empty line")
+	errHeader      = errors.New("unable to parse commit header")
+	errNoBlankLine = errors.New("commit description not followed by an empty line")
 )
 
 // Parse attempts to parse a commit message to a conventional commit
@@ -53,7 +53,7 @@ func Parse(message string) (*Commit, error) {
 			}
 		case 1:
 			if msgLine != "" {
-				return commit, errNoNewLine
+				return commit, errNoBlankLine
 			}
 		default:
 			key, value := parseLineAsFooter(msgLine)
@@ -154,4 +154,9 @@ func parseHeader(header string, commit *Commit) error {
 // IsHeaderErr checks if given error is header parse error
 func IsHeaderErr(err error) bool {
 	return errors.Is(err, errHeader)
+}
+
+// IsNoBlankLineErr checks if given error is no new line error
+func IsNoBlankLineErr(err error) bool {
+	return errors.Is(err, errNoBlankLine)
 }
