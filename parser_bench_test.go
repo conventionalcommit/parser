@@ -29,11 +29,15 @@ By: John Doe`
 // with fmt.Sprint removed
 // BenchmarkParser-4   	  229952	      4875 ns/op	    1365 B/op	      21 allocs/op
 
+var dumpRes *Commit
+
 func BenchmarkParser(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		_, err := Parse(sampleCommit)
+		r, err := Parse(sampleCommit)
 		if err != nil {
-			b.Fatal(err)
+			b.Error(err)
+			return
 		}
+		dumpRes = r
 	}
 }
