@@ -16,12 +16,14 @@ type Header struct {
 	Type        string
 	Scope       string
 	Description string
-	FullHeader  string
+
+	FullHeader string
 }
 
 // Footer represents Footer in commit message
 type Footer struct {
-	Notes      []FooterNote
+	Notes []FooterNote
+
 	FullFooter string
 }
 
