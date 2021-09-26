@@ -3,7 +3,6 @@ package parser
 
 import (
 	"errors"
-	"fmt"
 	"regexp"
 	"strings"
 )
@@ -80,12 +79,12 @@ func Parse(message string) (*Commit, error) {
 			currFooterValue = value
 		} else {
 			if inFooters {
-				currFooterValue = fmt.Sprintf("%s\n%s", currFooterValue, msgLine)
+				currFooterValue = currFooterValue + "\n" + msgLine
 			} else {
 				if commit.Body == "" {
 					commit.Body = msgLine
 				} else {
-					commit.Body += fmt.Sprintf("\n%s", msgLine)
+					commit.Body += "\n" + msgLine
 				}
 			}
 		}
