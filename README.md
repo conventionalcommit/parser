@@ -1,6 +1,6 @@
 # Parser
 
-go parser for [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/)
+A go parser for [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) messages
 
 [![PkgGoDev](https://pkg.go.dev/badge/github.com/conventionalcommit/parser)](https://pkg.go.dev/github.com/conventionalcommit/parser)
 
@@ -58,6 +58,11 @@ commitMsg = &parser.Commit{
 ### Fork
 
 This parser is a fork of [cov-commit-parser](github.com/mbamber/cov-commit-parser) by [Matthew Bamber](github.com/mbamber/)
+
+### TODO
+
+- [ ] Avoid regex
+- [ ] Benchmark
 
 ### License
 
