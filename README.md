@@ -57,7 +57,7 @@ commitMsg = &parser.Commit{
 
 ### Fork
 
-This parser is a fork of [cov-commit-parser](github.com/mbamber/cov-commit-parser) by [Matthew Bamber](github.com/mbamber/)
+This parser is a fork of [cov-commit-parser](https://github.com/mbamber/cov-commit-parser) by [Matthew Bamber](https://github.com/mbamber/)
 
 ### TODO
 
