@@ -1,12 +1,10 @@
-package parser_test
+package parser
 
 import (
 	"os"
 	"path/filepath"
 	"strings"
 	"testing"
-
-	"github.com/conventionalcommit/parser"
 )
 
 const (
@@ -23,254 +21,197 @@ const (
 	testDataDir = "testdata"
 )
 
-var breakingChangeFooter = parser.Footer{
-	Notes: []parser.FooterNote{
-		{
-			Token: "BREAKING CHANGE",
-			Value: "reason",
-		},
-	},
+var breakingChangeFooter = []Note{
+	newNote("BREAKING CHANGE", "reason"),
 }
 
-var commitFooters = parser.Footer{
-	Notes: []parser.FooterNote{
-		{
-			Token: "footer",
-			Value: "simple",
-		},
-		{
-			Token: "hash-footer",
-			Value: "123",
-		},
-	},
+var commitFooters = []Note{
+	newNote("footer", "simple"),
+	newNote("hash-footer", "123"),
 }
 
-var multiLineFooters = parser.Footer{
-	Notes: []parser.FooterNote{
-		{
-			Token: "footer",
-			Value: `multi line footer
+var multiLineFooters = []Note{
+	newNote("footer", `multi line footer
 message is here
-`,
-		},
-		{
-			Token: "hash-footer",
-			Value: "123",
-		},
-	},
+`),
+	newNote("hash-footer", "123"),
 }
 
 func TestParserDescription(t *testing.T) {
-	expectedCommit := &parser.Commit{
-		Header: parser.Header{
-			Type:        commitType,
-			Description: commitDescription,
-		},
+	expectedCommit := &Commit{
+		commitType:  commitType,
+		description: commitDescription,
 	}
 	parseMsgAndCompare(t, "description", expectedCommit)
 }
 
 func TestParserDescriptionScope(t *testing.T) {
-	expectedCommit := &parser.Commit{
-		Header: parser.Header{
-			Type:        commitType,
-			Scope:       commitScope,
-			Description: commitDescription,
-		},
+	expectedCommit := &Commit{
+		commitType:  commitType,
+		scope:       commitScope,
+		description: commitDescription,
 	}
 	parseMsgAndCompare(t, "description_scope", expectedCommit)
 }
 
 func TestParserBreakingChangeDescription(t *testing.T) {
-	expectedCommit := &parser.Commit{
-		Header: parser.Header{
-			Type:        commitType,
-			Description: commitDescription,
-		},
-		BreakingChange: true,
+	expectedCommit := &Commit{
+		commitType:       commitType,
+		description:      commitDescription,
+		isBreakingChange: true,
 	}
 	parseMsgAndCompare(t, "breaking_change_description", expectedCommit)
 }
 
 func TestParserBreakingChangeDescriptionScope(t *testing.T) {
-	expectedCommit := &parser.Commit{
-		Header: parser.Header{
-			Type:        commitType,
-			Scope:       commitScope,
-			Description: commitDescription,
-		},
-		BreakingChange: true,
+	expectedCommit := &Commit{
+		commitType:       commitType,
+		scope:            commitScope,
+		description:      commitDescription,
+		isBreakingChange: true,
 	}
 	parseMsgAndCompare(t, "breaking_change_description_scope", expectedCommit)
 }
 
 func TestParserDescriptionBody(t *testing.T) {
-	expectedCommit := &parser.Commit{
-		Header: parser.Header{
-			Type:        commitType,
-			Description: commitDescription,
-		},
-		Body: commitBody,
+	expectedCommit := &Commit{
+		commitType:  commitType,
+		description: commitDescription,
+		body:        commitBody,
 	}
 	parseMsgAndCompare(t, "description_body", expectedCommit)
 }
 
 func TestParserDescriptionScopeBody(t *testing.T) {
-	expectedCommit := &parser.Commit{
-		Header: parser.Header{
-			Type:        commitType,
-			Scope:       commitScope,
-			Description: commitDescription,
-		},
-		Body: commitBody,
+	expectedCommit := &Commit{
+		commitType:  commitType,
+		scope:       commitScope,
+		description: commitDescription,
+		body:        commitBody,
 	}
 	parseMsgAndCompare(t, "description_scope_body", expectedCommit)
 }
 
 func TestParserBreakingChangeDescriptionBody(t *testing.T) {
-	expectedCommit := &parser.Commit{
-		Header: parser.Header{
-			Type:        commitType,
-			Description: commitDescription,
-		},
-		Body:           commitBody,
-		BreakingChange: true,
+	expectedCommit := &Commit{
+		commitType:       commitType,
+		description:      commitDescription,
+		body:             commitBody,
+		isBreakingChange: true,
 	}
 	parseMsgAndCompare(t, "breaking_change_description_body", expectedCommit)
 }
 
 func TestParserBreakingChangeDescriptionScopeBody(t *testing.T) {
-	expectedCommit := &parser.Commit{
-		Header: parser.Header{
-			Type:        commitType,
-			Scope:       commitScope,
-			Description: commitDescription,
-		},
-		Body:           commitBody,
-		BreakingChange: true,
+	expectedCommit := &Commit{
+		commitType:       commitType,
+		scope:            commitScope,
+		description:      commitDescription,
+		body:             commitBody,
+		isBreakingChange: true,
 	}
 	parseMsgAndCompare(t, "breaking_change_description_scope_body", expectedCommit)
 }
 
 func TestParserDescriptionFooters(t *testing.T) {
-	expectedCommit := &parser.Commit{
-		Header: parser.Header{
-			Type:        commitType,
-			Description: commitDescription,
-		},
-		Footer: commitFooters,
+	expectedCommit := &Commit{
+		commitType:  commitType,
+		description: commitDescription,
+		notes:       commitFooters,
 	}
 	parseMsgAndCompare(t, "description_footers", expectedCommit)
 }
 
 func TestParserDescriptionScopeFooters(t *testing.T) {
-	expectedCommit := &parser.Commit{
-		Header: parser.Header{
-			Type:        commitType,
-			Scope:       commitScope,
-			Description: commitDescription,
-		},
-		Footer: commitFooters,
+	expectedCommit := &Commit{
+		commitType:  commitType,
+		scope:       commitScope,
+		description: commitDescription,
+		notes:       commitFooters,
 	}
 	parseMsgAndCompare(t, "description_scope_footers", expectedCommit)
 }
 
 func TestParserDescriptionBodyFooters(t *testing.T) {
-	expectedCommit := &parser.Commit{
-		Header: parser.Header{
-			Type:        commitType,
-			Description: commitDescription,
-		},
-		Body:   commitBody,
-		Footer: commitFooters,
+	expectedCommit := &Commit{
+		commitType:  commitType,
+		description: commitDescription,
+		body:        commitBody,
+		notes:       commitFooters,
 	}
 	parseMsgAndCompare(t, "description_body_footers", expectedCommit)
 }
 
 func TestParserDescriptionScopeBodyFooters(t *testing.T) {
-	expectedCommit := &parser.Commit{
-		Header: parser.Header{
-			Type:        commitType,
-			Scope:       commitScope,
-			Description: commitDescription,
-		},
-		Body:   commitBody,
-		Footer: commitFooters,
+	expectedCommit := &Commit{
+		commitType:  commitType,
+		scope:       commitScope,
+		description: commitDescription,
+		body:        commitBody,
+		notes:       commitFooters,
 	}
 	parseMsgAndCompare(t, "description_scope_body_footers", expectedCommit)
 }
 
 func TestParserDescriptionFootersBreakingChange(t *testing.T) {
-	expectedCommit := &parser.Commit{
-		Header: parser.Header{
-			Type:        commitType,
-			Description: commitDescription,
-		},
-		Footer:         breakingChangeFooter,
-		BreakingChange: true,
+	expectedCommit := &Commit{
+		commitType:       commitType,
+		description:      commitDescription,
+		notes:            breakingChangeFooter,
+		isBreakingChange: true,
 	}
 	parseMsgAndCompare(t, "description_footers_breaking_change", expectedCommit)
 }
 
 func TestParserBreakingChangeDescriptionFooters(t *testing.T) {
-	expectedCommit := &parser.Commit{
-		BreakingChange: true,
-		Header: parser.Header{
-			Type:        commitType,
-			Description: commitDescription,
-		},
-		Footer: commitFooters,
+	expectedCommit := &Commit{
+		isBreakingChange: true,
+		commitType:       commitType,
+		description:      commitDescription,
+		notes:            commitFooters,
 	}
 	parseMsgAndCompare(t, "breaking_change_description_footers", expectedCommit)
 }
 
 func TestParserBreakingChangeDescriptionBodyFooters(t *testing.T) {
-	expectedCommit := &parser.Commit{
-		BreakingChange: true,
-		Header: parser.Header{
-			Type:        commitType,
-			Description: commitDescription,
-		},
-		Body:   commitBody,
-		Footer: commitFooters,
+	expectedCommit := &Commit{
+		isBreakingChange: true,
+		commitType:       commitType,
+		description:      commitDescription,
+		body:             commitBody,
+		notes:            commitFooters,
 	}
 	parseMsgAndCompare(t, "breaking_change_description_body_footers", expectedCommit)
 }
 
 func TestParserBreakingChangeDescriptionScopeFooters(t *testing.T) {
-	expectedCommit := &parser.Commit{
-		Header: parser.Header{
-			Type:        commitType,
-			Scope:       commitScope,
-			Description: commitDescription,
-		},
-		Footer:         commitFooters,
-		BreakingChange: true,
+	expectedCommit := &Commit{
+		commitType:       commitType,
+		scope:            commitScope,
+		description:      commitDescription,
+		notes:            commitFooters,
+		isBreakingChange: true,
 	}
 	parseMsgAndCompare(t, "breaking_change_description_scope_footers", expectedCommit)
 }
 
 func TestParserBreakingChangeDescriptionScopeBodyFooters(t *testing.T) {
-	expectedCommit := &parser.Commit{
-		Header: parser.Header{
-			Type:        commitType,
-			Scope:       commitScope,
-			Description: commitDescription,
-		},
-		Body:           commitBody,
-		Footer:         commitFooters,
-		BreakingChange: true,
+	expectedCommit := &Commit{
+		commitType:       commitType,
+		scope:            commitScope,
+		description:      commitDescription,
+		body:             commitBody,
+		notes:            commitFooters,
+		isBreakingChange: true,
 	}
 	parseMsgAndCompare(t, "breaking_change_description_scope_body_footers", expectedCommit)
 }
 
 func TestParserFooterMultiLine(t *testing.T) {
-	expectedCommit := &parser.Commit{
-		Header: parser.Header{
-			Type:        commitType,
-			Description: commitDescription,
-		},
-		Footer: multiLineFooters,
+	expectedCommit := &Commit{
+		commitType:  commitType,
+		description: commitDescription,
+		notes:       multiLineFooters,
 	}
 	parseMsgAndCompare(t, "footer_multi_line", expectedCommit)
 }
@@ -283,13 +224,13 @@ func TestParserErrNoBlankLine(t *testing.T) {
 		t.Error(err)
 	}
 
-	_, err = parser.Parse(commitMsg)
+	_, err = Parse(commitMsg)
 	if err == nil {
 		t.Errorf("no error: test file %v passed", fileName)
 		return
 	}
 
-	if !parser.IsNoBlankLineErr(err) {
+	if !IsNoBlankLineErr(err) {
 		t.Error("error is not NoBlankLineErr error", err)
 	}
 }
@@ -302,25 +243,25 @@ func TestParserErrHeaderLine(t *testing.T) {
 		t.Error(err)
 	}
 
-	_, err = parser.Parse(commitMsg)
+	_, err = Parse(commitMsg)
 	if err == nil {
 		t.Errorf("no error: test file %v passed", fileName)
 		return
 	}
 
-	if !parser.IsHeaderErr(err) {
+	if !IsHeaderErr(err) {
 		t.Error("error is not HeaderErr error", err)
 	}
 }
 
-func parseMsgAndCompare(t *testing.T, fileName string, expectedCommit *parser.Commit) {
+func parseMsgAndCompare(t *testing.T, fileName string, expectedCommit *Commit) {
 	commitMsg, err := loadCommitMsgFromFile(filepath.Join(testDataDir, fileName))
 	if err != nil {
 		t.Errorf("Received unexpected error:\n%+v", err)
 		return
 	}
 
-	actualCommit, err := parser.Parse(commitMsg)
+	actualCommit, err := Parse(commitMsg)
 	if err != nil {
 		t.Errorf("Received unexpected error:\n%+v", err)
 		return
@@ -342,27 +283,27 @@ func loadCommitMsgFromFile(fileName string) (string, error) {
 	return strings.TrimSpace(string(out)), nil
 }
 
-func compareCommit(t *testing.T, a, b *parser.Commit) bool {
-	if a.Header.Type != b.Header.Type {
+func compareCommit(t *testing.T, a, b *Commit) bool {
+	if a.commitType != b.commitType {
 		t.Log("Header Type Not Equal")
 		return false
 	}
-	if a.Header.Description != b.Header.Description {
+	if a.description != b.description {
 		t.Log("Header Description Not Equal")
 		return false
 	}
-	if a.Header.Scope != b.Header.Scope {
+	if a.scope != b.scope {
 		t.Log("Header Scope Not Equal")
 		return false
 	}
 
-	if a.Body != b.Body {
+	if a.body != b.body {
 		t.Log("Body Not Equal")
 		return false
 	}
 
-	notesA := a.Footer.Notes
-	notesB := b.Footer.Notes
+	notesA := a.notes
+	notesB := b.notes
 
 	if len(notesA) != len(notesB) {
 		t.Log("Footer Notes Not Equal")
@@ -371,12 +312,12 @@ func compareCommit(t *testing.T, a, b *parser.Commit) bool {
 
 	for index, aFoot := range notesA {
 		bFoot := notesB[index]
-		if aFoot.Token != bFoot.Token {
-			t.Log("Footer Notes Token Not Equal", index, aFoot.Token, bFoot.Token)
+		if aFoot.Token() != bFoot.Token() {
+			t.Log("Footer Notes Token Not Equal", index, aFoot.Token(), bFoot.Token())
 			return false
 		}
-		if aFoot.Value != bFoot.Value {
-			t.Log("Footer Notes Value Not Equal", index, aFoot.Value, bFoot.Value)
+		if aFoot.Value() != bFoot.Value() {
+			t.Log("Footer Notes Value Not Equal", index, aFoot.Value(), bFoot.Value())
 			return false
 		}
 	}

@@ -23,5 +23,5 @@ By: John Doe`
 	}
 	fmt.Printf("%#v", commit)
 
-	// Output: &parser.Commit{Header:parser.Header{Type:"feat", Scope:"scope", Description:"description", FullHeader:"feat(scope): description"}, Body:"this is first line in body\n\nthis is second line in body", Footer:parser.Footer{Notes:[]parser.FooterNote{parser.FooterNote{Token:"Ref", Value:"123"}, parser.FooterNote{Token:"Date", Value:"01-01-2021"}, parser.FooterNote{Token:"By", Value:"John Doe"}}, FullFooter:"Ref #123\nDate: 01-01-2021\nBy: John Doe"}, BreakingChange:false, FullCommit:"feat(scope): description\n\nthis is first line in body\n\nthis is second line in body\n\nRef #123\nDate: 01-01-2021\nBy: John Doe"}
+	// Output: &parser.Commit{message:"feat(scope): description\n\nthis is first line in body\n\nthis is second line in body\n\nRef #123\nDate: 01-01-2021\nBy: John Doe", header:"feat(scope): description", body:"this is first line in body\n\nthis is second line in body", footer:"Ref #123\nDate: 01-01-2021\nBy: John Doe", commitType:"feat", scope:"scope", description:"description", notes:[]parser.Note{parser.Note{token:"Ref", value:"123"}, parser.Note{token:"Date", value:"01-01-2021"}, parser.Note{token:"By", value:"John Doe"}}, isBreakingChange:false}
 }
