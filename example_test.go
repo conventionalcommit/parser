@@ -6,7 +6,7 @@ import (
 	"github.com/conventionalcommit/parser"
 )
 
-func ExampleParse() {
+func ExampleParser() {
 	var msg = `feat(scope): description
 
 this is first line in body
