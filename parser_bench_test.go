@@ -31,9 +31,11 @@ By: John Doe`
 
 var dumpRes *Commit
 
+var p = New()
+
 func BenchmarkParser(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		r, err := Parse(sampleCommit)
+		r, err := p.Parse(sampleCommit)
 		if err != nil {
 			b.Error(err)
 			return

@@ -19,7 +19,7 @@ func TestParseHeaderValid(t *testing.T) {
 		"1245#feat1234(@scope/scope1,scope2): description, \n\n body 1 2, 3 and 4?",
 	}
 
-	p := newParser()
+	p := New()
 
 	for index, validCase := range validCases {
 
@@ -50,7 +50,7 @@ func TestParseHeaderInvalid(t *testing.T) {
 		`feat(scope))!: A description with name.txt`,
 	}
 
-	p := newParser()
+	p := New()
 
 	for index, validCase := range validCases {
 		testName := "case#" + strconv.Itoa(index+1)

@@ -56,7 +56,7 @@ func (c *Commit) Notes() []Note {
 	return c.notes
 }
 
-// IsBreakingChange returns true if breaking change
+// IsBreakingChange returns true if commit is breaking change
 func (c *Commit) IsBreakingChange() bool {
 	return c.isBreakingChange
 }

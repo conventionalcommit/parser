@@ -18,28 +18,28 @@ const (
 	footRegExStr = `^(?:(BREAKING[- ]CHANGE|(?:[A-Za-z-])+): |((?:[A-Za-z-])+) #)(.+)$`
 )
 
-var defParser = newParser()
-
-// Parse attempts to parse a commit message to a conventional commit
-func Parse(message string) (*Commit, error) {
-	return defParser.parse(message)
-}
-
-type parser struct {
+// Parser represent a conventional commit message parser
+type Parser struct {
 	headerRegex, footerRegex *regexp.Regexp
 }
 
-func newParser() *parser {
+// New returns a new parser
+func New() *Parser {
 	headerRegex := regexp.MustCompile(headRegExStr)
 	footerRegex := regexp.MustCompile(footRegExStr)
 
-	return &parser{
+	return &Parser{
 		headerRegex: headerRegex,
 		footerRegex: footerRegex,
 	}
 }
 
-func (p *parser) parse(message string) (*Commit, error) {
+// Parse attempts to parse a commit message to a conventional commit
+func (p *Parser) Parse(message string) (*Commit, error) {
+	return p.parse(message)
+}
+
+func (p *Parser) parse(message string) (*Commit, error) {
 	c := &Commit{
 		message: message,
 	}
@@ -124,7 +124,7 @@ func (p *parser) parse(message string) (*Commit, error) {
 
 // parseLineAsFooter attempts to parse the given line as a footer, returning both the key and the value of the header.
 // If the line cannot be parsed then isFooter is false
-func (p *parser) parseLineAsFooter(line string) (key, value string, isFooter bool) {
+func (p *Parser) parseLineAsFooter(line string) (key, value string, isFooter bool) {
 	matches := p.footerRegex.FindStringSubmatch(line)
 	if len(matches) != 4 {
 		return "", "", false
@@ -137,7 +137,7 @@ func (p *parser) parseLineAsFooter(line string) (key, value string, isFooter boo
 }
 
 // parseHeader attempts to parse the commit description line and set the appropriate values in the the given commit
-func (p *parser) parseHeader(c *Commit, header string) error {
+func (p *Parser) parseHeader(c *Commit, header string) error {
 	matches := p.headerRegex.FindStringSubmatch(header)
 	if matches == nil {
 		return errHeader

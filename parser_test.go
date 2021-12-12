@@ -224,7 +224,8 @@ func TestParserErrNoBlankLine(t *testing.T) {
 		t.Error(err)
 	}
 
-	_, err = Parse(commitMsg)
+	p := New()
+	_, err = p.Parse(commitMsg)
 	if err == nil {
 		t.Errorf("no error: test file %v passed", fileName)
 		return
@@ -243,7 +244,8 @@ func TestParserErrHeaderLine(t *testing.T) {
 		t.Error(err)
 	}
 
-	_, err = Parse(commitMsg)
+	p := New()
+	_, err = p.Parse(commitMsg)
 	if err == nil {
 		t.Errorf("no error: test file %v passed", fileName)
 		return
@@ -261,7 +263,8 @@ func parseMsgAndCompare(t *testing.T, fileName string, expectedCommit *Commit) {
 		return
 	}
 
-	actualCommit, err := Parse(commitMsg)
+	p := New()
+	actualCommit, err := p.Parse(commitMsg)
 	if err != nil {
 		t.Errorf("Received unexpected error:\n%+v", err)
 		return

@@ -17,7 +17,8 @@ Ref #123
 Date: 01-01-2021
 By: John Doe`
 
-	commit, err := parser.Parse(msg)
+	p := parser.New()
+	commit, err := p.Parse(msg)
 	if err != nil {
 		fmt.Printf("Error: %s", err.Error())
 	}
