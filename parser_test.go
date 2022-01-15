@@ -3,6 +3,7 @@ package parser
 import (
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"testing"
 )
@@ -32,8 +33,7 @@ var commitFooters = []Note{
 
 var multiLineFooters = []Note{
 	newNote("footer", `multi line footer
-message is here
-`),
+message is here`),
 	newNote("hash-footer", "123"),
 }
 
@@ -219,7 +219,7 @@ func TestParserFooterMultiLine(t *testing.T) {
 func TestParserErrNoBlankLine(t *testing.T) {
 	fileName := "err_no_blank_line"
 
-	commitMsg, err := loadCommitMsgFromFile(filepath.Join(testDataDir, fileName))
+	commitMsg, err := loadCommitMsgFromFile(fileName)
 	if err != nil {
 		t.Error(err)
 	}
@@ -231,33 +231,13 @@ func TestParserErrNoBlankLine(t *testing.T) {
 		return
 	}
 
-	if !IsNoBlankLineErr(err) {
+	if err != errHeaderMissingEmptyLine {
 		t.Error("error is not NoBlankLineErr error", err)
 	}
 }
 
-func TestParserErrHeaderLine(t *testing.T) {
-	fileName := "err_header_line"
-
-	commitMsg, err := loadCommitMsgFromFile(filepath.Join(testDataDir, fileName))
-	if err != nil {
-		t.Error(err)
-	}
-
-	p := New()
-	_, err = p.Parse(commitMsg)
-	if err == nil {
-		t.Errorf("no error: test file %v passed", fileName)
-		return
-	}
-
-	if !IsHeaderErr(err) {
-		t.Error("error is not HeaderErr error", err)
-	}
-}
-
 func parseMsgAndCompare(t *testing.T, fileName string, expectedCommit *Commit) {
-	commitMsg, err := loadCommitMsgFromFile(filepath.Join(testDataDir, fileName))
+	commitMsg, err := loadCommitMsgFromFile(fileName)
 	if err != nil {
 		t.Errorf("Received unexpected error:\n%+v", err)
 		return
@@ -279,7 +259,8 @@ func parseMsgAndCompare(t *testing.T, fileName string, expectedCommit *Commit) {
 // loadCommitMsgFromFile loads a file and returns the entire contents as a string. Any
 // leading or trailing whitespace is removed
 func loadCommitMsgFromFile(fileName string) (string, error) {
-	out, err := os.ReadFile(fileName)
+	fullPath := filepath.Join(testDataDir, fileName)
+	out, err := os.ReadFile(fullPath)
 	if err != nil {
 		return "", err
 	}
@@ -301,7 +282,12 @@ func compareCommit(t *testing.T, a, b *Commit) bool {
 	}
 
 	if a.body != b.body {
-		t.Log("Body Not Equal")
+		t.Logf("Body Not Equal, actual: %s, expected: %s", strconv.Quote(a.body), strconv.Quote(b.body))
+		return false
+	}
+
+	if a.isBreakingChange != b.isBreakingChange {
+		t.Log("BreakingChange Not Equal")
 		return false
 	}
 
@@ -316,11 +302,11 @@ func compareCommit(t *testing.T, a, b *Commit) bool {
 	for index, aFoot := range notesA {
 		bFoot := notesB[index]
 		if aFoot.Token() != bFoot.Token() {
-			t.Log("Footer Notes Token Not Equal", index, aFoot.Token(), bFoot.Token())
+			t.Logf("Footer Notes Token Not Equal, ActualToken1: %s, ExpectedToken2: %s", strconv.Quote(aFoot.Token()), strconv.Quote(bFoot.Token()))
 			return false
 		}
 		if aFoot.Value() != bFoot.Value() {
-			t.Log("Footer Notes Value Not Equal", index, aFoot.Value(), bFoot.Value())
+			t.Logf("Footer Notes Value Not Equal, ActualValue1: %s, ExpectedValue2: %s", strconv.Quote(aFoot.Value()), strconv.Quote(bFoot.Value()))
 			return false
 		}
 	}

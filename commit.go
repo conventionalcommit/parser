@@ -74,10 +74,12 @@ func newNote(token, value string) Note {
 	}
 }
 
+// Token returns the token of the Footer Note
 func (n *Note) Token() string {
 	return n.token
 }
 
+// Value returns the value of the Footer Note
 func (n *Note) Value() string {
 	return n.value
 }

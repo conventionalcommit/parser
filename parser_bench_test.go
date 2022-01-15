@@ -14,20 +14,14 @@ Ref: #123
 Date: 01-01-2021
 By: John Doe`
 
-// regex Compile everytime
-// BenchmarkParser-4   	    7255	    156239 ns/op	  126473 B/op	     761 allocs/op
-
-// regex Compile once
-// BenchmarkParser-4   	  179227	      6531 ns/op	    1478 B/op	      23 allocs/op
-
-// header regex clean
-// BenchmarkParser-4   	  206452	      5199 ns/op	    1414 B/op	      23 allocs/op
-
-// after deps cleanup
-// BenchmarkParser-4   	  228248	      5215 ns/op	    1414 B/op	      23 allocs/op
-
-// with fmt.Sprint removed
+// regex based parser - last version
 // BenchmarkParser-4   	  229952	      4875 ns/op	    1365 B/op	      21 allocs/op
+
+// lexer based parser
+// BenchmarkParser-4   	   77244	     15265 ns/op	    6448 B/op	     306 allocs/op
+
+// lexer: remove linked list stack
+// BenchmarkParser-4   	  152005	      7352 ns/op	    2928 B/op	      60 allocs/op
 
 var dumpRes *Commit
 

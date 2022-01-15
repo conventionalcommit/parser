@@ -2,7 +2,7 @@
 
 A go parser for [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) messages
 
-[![PkgGoDev](https://pkg.go.dev/badge/github.com/conventionalcommit/parser)](https://pkg.go.dev/github.com/conventionalcommit/parser)
+[![PkgGoDev](https://pkg.go.dev/badge/github.com/conventionalcommit/parser)](https://pkg.go.dev/github.com/conventionalcommit/parser)![GitHub go.mod Go version](https://img.shields.io/github/go-mod/go-version/conventionalcommit/parser)
 
 ### Usage
 
@@ -42,16 +42,19 @@ commitMsg = &parser.Commit{
 */
 ```
 
-### Fork
-
-This parser is a fork of [cov-commit-parser](https://github.com/mbamber/cov-commit-parser) by [Matthew Bamber](https://github.com/mbamber/)
-
 ### TODO
 
-- [ ] Avoid regex
+- [ ] More Test Cases
 - [ ] Benchmark
+
+### Attribution
+
+This parser is inspired and forked from
+
+- [cc](https://github.com/zbindenren/cc) by [Rene Zbinden](https://github.com/zbindenren)
+- [go-lexer](https://github.com/bbuck/go-lexer) by [Brandon Buck](https://github.com/bbuck)
+- [cov-commit-parser](https://github.com/mbamber/cov-commit-parser) by [Matthew Bamber](https://github.com/mbamber)
 
 ### License
 
 [MIT License](https://github.com/conventionalcommit/parser/tree/master/LICENSE.md)
-

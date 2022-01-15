@@ -21,13 +21,11 @@ func TestParseHeaderValid(t *testing.T) {
 
 	p := New()
 
-	for index, validCase := range validCases {
-
-		testName := "case#" + strconv.Itoa(index+1)
+	for i, validCase := range validCases {
+		testName := "case#" + strconv.Itoa(i+1)
 		t.Run(testName, func(innerT *testing.T) {
 			headerLine := strings.Split(validCase, "\n")[0]
-			c := &Commit{}
-			err := p.parseHeader(c, headerLine)
+			_, err := p.Parse(headerLine)
 			if err != nil {
 				innerT.Error("parseHeader failed for", headerLine, err)
 				return
@@ -37,27 +35,32 @@ func TestParseHeaderValid(t *testing.T) {
 }
 
 func TestParseHeaderInvalid(t *testing.T) {
-	var validCases = []string{
+	var invalidCases = []string{
 		`feat:() description with name.txt`,
 		`feat:1 description with name.txt`,
 		`feat:! description with name.txt`,
 		`feat:A description with name.txt`,
 		`feat123:A description with name.txt`,
 		`feat!:A description with name.txt`,
-		`feat())!:A description with name.txt`,
+		`feat())!:A description with name1.txt`,
+		`feat(()!:A description with name2.txt`,
 		`feat(scope1)!:A description with name.txt`,
 		`!feat(scope1)!:A description with name.txt`,
 		`feat(scope))!: A description with name.txt`,
+		`feat((scope))!: A description with name.txt`,
+		`feat((scope)!: A description with name.txt`,
+		`feat((`,
+		`feat():`,
+		`feat):`,
 	}
 
 	p := New()
 
-	for index, validCase := range validCases {
-		testName := "case#" + strconv.Itoa(index+1)
+	for i, invalidCase := range invalidCases {
+		testName := "case#" + strconv.Itoa(i+1)
 		t.Run(testName, func(innerT *testing.T) {
-			headerLine := strings.Split(validCase, "\n")[0]
-			c := &Commit{}
-			err := p.parseHeader(c, headerLine)
+			headerLine := strings.Split(invalidCase, "\n")[0]
+			_, err := p.Parse(headerLine)
 			if err == nil {
 				innerT.Error("parseHeader passed without error for", headerLine)
 			}
