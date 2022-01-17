@@ -47,8 +47,8 @@ func (p *Parser) parse(input string) (*Commit, error) {
 			c.scope = t.Value
 		case descriptionToken:
 			c.description = t.Value
+			c.header = strings.TrimSpace(lex.Get(0, t.End))
 		case bodyToken:
-			c.header = strings.TrimSpace(lex.Get(0, t.Start))
 			c.body = strings.TrimSpace(t.Value)
 		case footerKeyToken:
 			if footerStartPos == 0 {
