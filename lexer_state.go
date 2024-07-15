@@ -111,12 +111,13 @@ func descriptionDelimiterState(l *lexer) stateFunc {
 		l.Emit(breakingChangeToken)
 	}
 
-	l.Take(": ")
+	l.Next()
 
-	if l.Current() != ": " {
+	if l.Current() != ":" || l.Peek() != ' ' {
 		l.Error(errDescMissingDelimiter)
 		return nil
 	}
+	l.Next()
 
 	l.Emit(descDelimiterToken)
 
