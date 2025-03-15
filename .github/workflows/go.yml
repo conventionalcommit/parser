@@ -5,6 +5,14 @@ on:
     branches: [ "master" ]
   pull_request:
     branches: [ "master" ]
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - review_requested
+  pull_request_review:
+    types:
+      - submitted
   workflow_dispatch:
 
 jobs:
