@@ -1,5 +1,9 @@
 # Parser
 
+> [!WARNING]
+> **Deprecated and unmaintained.** This package is no longer maintained and receives no further updates.
+> Use [github.com/conventionalcommit/syntax](https://github.com/conventionalcommit/syntax) instead (`go get github.com/conventionalcommit/syntax`), a faster parser with zero dependencies, zero heap allocations for headers and bodies, exact source spans, and diagnostic recovery.
+
 A go parser for [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) messages
 
 [![PkgGoDev](https://pkg.go.dev/badge/github.com/conventionalcommit/parser)](https://pkg.go.dev/github.com/conventionalcommit/parser)![GitHub go.mod Go version](https://img.shields.io/github/go-mod/go-version/conventionalcommit/parser)
